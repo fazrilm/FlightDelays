@@ -1,0 +1,41 @@
+---
+title: "Assigning Cause and Predicting Flight Delays in the United States"
+author: "Jaime Andaluz, Fazril Mustapa, Isha Singh, Bruce Zhang"
+date: "January 16, 2017"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project Description:
+
+Delays are a usual occurrence in the airline industry, and increases cost to the airlines and also cost and annoyance to the passengers. Based on data, we would like to analyse what are the major cause for flight delays and assign a probability on whether a particular flight will be delayed. 
+
+We will be using data sourced from Kaggle (https://www.kaggle.com/giovamata/airlinedelaycauses)
+
+
+## Background
+
+
+
+
+## Process
+
+
+
+
+## Data
+
+
+
+
+## Analysis
+
+
+
+
+## Conclusion
+
