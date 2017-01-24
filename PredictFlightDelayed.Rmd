@@ -28,13 +28,33 @@ This project is done by a group of INSEAD MBA(17J) students who are enrolled in 
 
 Delays are not an unusual occurrence in the airline industry, and generates additional cost to the airline companies and also increases unsatisfaction to the passengers. However, we recognize that flight delay is not caused by a single factor but multiple ones that spans from previous flight delay, to ground operation, and passenger security check. Based on the data, we would like to analyse what are the major cause for flight delays and assign a probability on whether a particular flight will be delayed. 
 
+```{r}
+ProjectData <- read.csv(file = "Jan_AA.csv", header = TRUE, sep=",")
+```
+```{r}
+
+range(ProjectData[,11])
+mean(ProjectData[,11])
+mean(ProjectData[,12])
+```
+
+```{r}
+hist(ProjectData[,11], main = "Arrival Delay", xlab = "Minutes")
+hist(ProjectData[,12], main = "Departure Delay", xlab = "Minutes")
+```
+
+
+
 ## Analytic Process 
 
 ###1. Understand the business problem
-asdf
+Flight delays are a key factor for airline profitability, since it decreases the utilization of the assets, decreases negotiation power with airports, and create a bad perception on customers.
+
+We have January 2008 data for American Airlines flight delays in order to understand the reason of the delays. This way American airlines can focused their efforts to reduce flight delays
+
 
 ###2. Data Consolidation 
-The data file is ...
+We can see that when there is a delay the average delay time is:
 
 ###3. Factor Analysis 
 asdf
