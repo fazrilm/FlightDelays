@@ -41,6 +41,22 @@ factor_attributes_used = unique(sapply(factor_attributes_used,function(i) min(nc
 ProjectDataFactor=ProjectData[,factor_attributes_used]
 ProjectDataFactor <- ProjectData <- data.matrix(ProjectDataFactor)
 ```
+Original Data
+
+```{r}
+rownames(ProjectDataFactor) <- paste0("observation ", sprintf("%02i", 1:nrow(ProjectDataFactor)))
+knitr::kable(round(ProjectDataFactor, 2)[1:min(max_data_report,nrow(ProjectDataFactor)), ])
+```
+
+Data Scaling
+
+```{r, echo=TRUE, tidy=TRUE}
+ProjectDatafactor_scaled=apply(ProjectDataFactor,2, function(r) {if (sd(r)!=0) res=(r-mean(r))/sd(r) else res=0*r; res})
+```
+
+```{r}
+knitr::kable(round(my_summary(ProjectDatafactor_scaled), 2))
+```
 
 ## Introduction
 
