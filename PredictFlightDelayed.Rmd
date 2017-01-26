@@ -49,7 +49,7 @@ ProjectData=data.matrix(ProjectData)
 
 # Please ENTER then original raw attributes to use. 
 # Please use numbers, not column names! e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
-factor_attributes_used= c(4:23)
+factor_attributes_used= c(4:22)
 
 # Please ENTER the selection criterions for the factors to use. 
 # Choices: "eigenvalue", "variance", "manual"
@@ -81,15 +81,12 @@ This project is done by a group of INSEAD MBA(17J) students who are enrolled in 
 
 ## Project Description
 
-Delays are not an unusual occurrence in the airline industry, and generates additional cost to the airline companies and also increases unsatisfaction to the passengers. However, we recognize that flight delay is not caused by a single factor but multiple ones that spans from previous flight delay, to ground operation, and passenger security check. Based on the data, we would like to analyse what are the major cause for flight delays and assign a probability on whether a particular flight will be delayed. 
+Flight delays are a key factor for airline profitability, since it decreases the utilization of the assets, decreases negotiation power with airports, and create a bad perception on customers. 
+
+We aim to have a deep understanding of the causes of the flight delay from a statistical approach. Based on the data we gather for American Airline flight delay in 2008 Jan, we will perform factor analysis to find out the reasons of the delay and try to develop a predictive model to predict future flight delay.
 
 ## Explaining the data
 
-The variables used: 
-1, 
-2,
-3,
-4,
 
 This is how the first `r min(max_data_report, nrow(ProjectData))` data looks:
 
@@ -147,44 +144,55 @@ knitr::kable(round(thecor,2))
 
 ## Principle Components Analysis
 
+
 ```{r}
-UnRotated_Results<-principal(ProjectDataFactor, nfactors = ncol(ProjectDataFactor), rotate="none",score=TRUE)
-UnRotated_Factors<-round(UnRotated_Results$loadings,2)
-UnRotated_Factors<-as.data.frame(unclass(UnRotated_Factors))
-colnames(UnRotated_Factors)<-paste("Component",1:ncol(UnRotated_Factors),sep=" ")
+Variance_Explained_Table_results<-PCA(ProjectDataFactor, graph=FALSE)
+Variance_Explained_Table<-Variance_Explained_Table_results$eig
+Variance_Explained_Table_copy<-Variance_Explained_Table
+
+
+rownames(Variance_Explained_Table) <- paste("Component", 1:nrow(Variance_Explained_Table))
+colnames(Variance_Explained_Table) <- c("Eigenvalue", "Pct of explained variance", "Cumulative pct of explained variance")
+
+knitr::kable(round(Variance_Explained_Table, 2))
 ```
 
 
-
-## Analytic Process 
-
-###1. Understand the business problem
-Flight delays are a key factor for airline profitability, since it decreases the utilization of the assets, decreases negotiation power with airports, and create a bad perception on customers.
-
-We have January 2008 data for American Airlines flight delays in order to understand the reason of the delays. This way American airlines can focused their efforts to reduce flight delays
-
-
-###2. Data Consolidation 
-We can see that when there is a delay the average delay time is:
-
-###3. Factor Analysis 
-asdf
-
-###4. Intepretation
-asdf
-###5. Conclusion 
-asdf
-
-```{r cars}
-summary(cars)
+```{r figure01}
+eigenvalues  <- Variance_Explained_Table[, "Eigenvalue"]
+df           <- cbind(as.data.frame(eigenvalues), c(1:length(eigenvalues)), rep(1, length(eigenvalues)))
+colnames(df) <- c("eigenvalues", "components", "abline")
+ggplot(melt(df, id="components"), aes(x=components, y=value, colour=variable)) + geom_line()
 ```
+
+
+## Interpretation
+
+```{r}
+if (factor_selectionciterion == "eigenvalue")
+  factors_selected = sum(Variance_Explained_Table_copy[,1] >= 1)
+if (factor_selectionciterion == "variance")
+  factors_selected = 1:head(which(Variance_Explained_Table_copy[,"cumulative percentage of variance"]>= minimum_variance_explained),1)
+if (factor_selectionciterion == "manual")
+  factors_selected = manual_numb_factors_used
+
+```
+For our data, the `r factors_selected` selected factors look as follows after the `r rotation_used` rotation: 
+
+
+
+
+
+<!-- # ```{r cars} -->
+<!-- # summary(cars) -->
+<!-- # ``` -->
 
 ## Including Plots
 
-You can also embed plots, for example:
+<!-- You can also embed plots, for example: -->
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+<!-- ```{r pressure, echo=FALSE} -->
+<!-- plot(pressure) -->
+<!-- ``` -->
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+<!-- Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot. -->
