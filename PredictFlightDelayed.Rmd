@@ -16,8 +16,8 @@ always_allow_html: yes
 ---
 ```{r setuplibraries, echo=FALSE, message=FALSE}
 
-source("../../INSEADAnalytics/AnalyticsLibraries/library.R")
-source("../../INSEADAnalytics/AnalyticsLibraries/heatmapOutput.R")
+source("Library/library.R")
+source("Library/heatmapOutput.R")
 ggthemr('fresh')  # ggplot theme
 opts_knit$set(progress=FALSE, verbose=FALSE)
 opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.5)
