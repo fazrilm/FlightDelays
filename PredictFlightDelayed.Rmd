@@ -24,6 +24,7 @@ opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.5)
 options(knitr.kable.NA = '')
 ```
 
+<!-- This part contains the setting of the variables used in the analysis -->
 
 ```{r setup, echo=FALSE, message=FALSE}
 # Load the data
@@ -70,9 +71,10 @@ factor_attributes_used = unique(sapply(factor_attributes_used,function(i) min(nc
 ProjectDataFactor=ProjectData[,factor_attributes_used]
 ProjectDataFactor <- ProjectData <- data.matrix(ProjectDataFactor)
 
-rownames(ProjectDataFactor) <- paste0("Flight ", sprintf("%02i", 1:nrow(ProjectDataFactor)))
+rownames(ProjectDataFactor) <- paste0("", sprintf("%02i", 1:nrow(ProjectDataFactor)))
 ```
 
+<!-- End  -->
 
 ## Introduction
 
@@ -187,7 +189,7 @@ For our data, the `r factors_selected` selected factors look as follows after th
 <!-- # summary(cars) -->
 <!-- # ``` -->
 
-## Including Plots
+## Additional Plots
 
 <!-- You can also embed plots, for example: -->
 
