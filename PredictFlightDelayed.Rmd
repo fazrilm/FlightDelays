@@ -1,5 +1,5 @@
 ---
-title: "Predicting Flight Delays in United States"
+title: "Predicting American Airline Flight Delays in United States"
 author: "Bruce Zhang, Jaime Andaluz, Frazil Mustapa, Isha Singh  "
 output:
   html_document:
@@ -14,49 +14,65 @@ output:
       in_header: ../../INSEADAnalytics/AnalyticsStyles/default.sty
 always_allow_html: yes
 ---
+```{r setuplibraries, echo=FALSE, message=FALSE}
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+source("../../INSEADAnalytics/AnalyticsLibraries/library.R")
+source("../../INSEADAnalytics/AnalyticsLibraries/heatmapOutput.R")
+ggthemr('fresh')  # ggplot theme
+opts_knit$set(progress=FALSE, verbose=FALSE)
+opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.5)
+options(knitr.kable.NA = '')
 ```
-```{r setupdata1E, echo=TRUE, tidy=TRUE}
-# Please ENTER the name of the file with the data used. The file should be a .csv with one row per observation (e.g. person) and one column per attribute. Do not add .csv at the end, make sure the data are numeric.
-datafile_name = "Jan_AA.csv"
+
+
+```{r setup, echo=FALSE, message=FALSE}
+# Load the data
+
+# Please ENTER the name of the file with the data used. The file should be a .csv with one row per observation (e.g. person) and one column per attribute. 
+
+datafile_name="Jan_AA" #  do not add .csv at the end, make sure the data are numeric, check your file.
 
 # Please enter the minimum number below which you would like not to print - this makes the readability of the tables easier. Default values are either 10e6 (to print everything) or 0.5. Try both to see the difference.
-MIN_VALUE = 0.5
+MIN_VALUE=0.5
 
-# Please enter the maximum number of observations to show in the report and slides. 
-# DEFAULT is 10. If the number is large the report may be slow.
-max_data_report = 10
-```
+# Please enter the maximum number of observations to show in the report and slides 
+# (DEFAULT is 15. If the number is large the report and slides may not be generated - very slow or will crash!!)
+max_data_report = 15
 
-```{r}
-ProjectData <- read.csv(datafile_name)
-ProjectData <- data.matrix(ProjectData) 
-ProjectData_INITIAL <- ProjectData
+ProjectData <- read.csv(file = "Jan_AA.csv", header = TRUE, sep=",") # this contains only the matrix ProjectData
+ProjectData=data.matrix(ProjectData) 
 
+# if (datafile_name == "Jan_AA")
+#   colnames(ProjectData)<-gsub("\\."," ",colnames(ProjectData))
+
+# SET UP OF ALL THE INPUTS FOR THIS READING
+
+# Please ENTER then original raw attributes to use. 
+# Please use numbers, not column names! e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
 factor_attributes_used= c(4:23)
+
+# Please ENTER the selection criterions for the factors to use. 
+# Choices: "eigenvalue", "variance", "manual"
+factor_selectionciterion = "eigenvalue"
+
+# Please ENTER the desired minumum variance explained 
+# (ONLY USED in case "variance" is the factor selection criterion used). 
+minimum_variance_explained = 65  # between 1 and 100
+
+# Please ENTER the number of factors to use 
+# (ONLY USED in case "manual" is the factor selection criterion used).
+manual_numb_factors_used = 2
+
+# Please ENTER the rotation eventually used (e.g. "none", "varimax", "quatimax", "promax", "oblimin", "simplimax", and "cluster" - see help(principal)). Defauls is "varimax"
+rotation_used="varimax"
 
 factor_attributes_used = unique(sapply(factor_attributes_used,function(i) min(ncol(ProjectData), max(i,1))))
 ProjectDataFactor=ProjectData[,factor_attributes_used]
 ProjectDataFactor <- ProjectData <- data.matrix(ProjectDataFactor)
-```
-Original Data
 
-```{r}
-rownames(ProjectDataFactor) <- paste0("observation ", sprintf("%02i", 1:nrow(ProjectDataFactor)))
-knitr::kable(round(ProjectDataFactor, 2)[1:min(max_data_report,nrow(ProjectDataFactor)), ])
+rownames(ProjectDataFactor) <- paste0("Flight ", sprintf("%02i", 1:nrow(ProjectDataFactor)))
 ```
 
-Data Scaling
-
-```{r, echo=TRUE, tidy=TRUE}
-ProjectDatafactor_scaled=apply(ProjectDataFactor,2, function(r) {if (sd(r)!=0) res=(r-mean(r))/sd(r) else res=0*r; res})
-```
-
-```{r}
-knitr::kable(round(my_summary(ProjectDatafactor_scaled), 2))
-```
 
 ## Introduction
 
@@ -67,19 +83,75 @@ This project is done by a group of INSEAD MBA(17J) students who are enrolled in 
 
 Delays are not an unusual occurrence in the airline industry, and generates additional cost to the airline companies and also increases unsatisfaction to the passengers. However, we recognize that flight delay is not caused by a single factor but multiple ones that spans from previous flight delay, to ground operation, and passenger security check. Based on the data, we would like to analyse what are the major cause for flight delays and assign a probability on whether a particular flight will be delayed. 
 
-```{r}
-ProjectData <- read.csv(file = "Jan_AA.csv", header = TRUE, sep=",")
-```
-```{r}
+## Explaining the data
 
-range(ProjectData[,11])
-mean(ProjectData[,11])
-mean(ProjectData[,12])
+The variables used: 
+1, 
+2,
+3,
+4,
+
+This is how the first `r min(max_data_report, nrow(ProjectData))` data looks:
+
+```{r}
+knitr::kable(round(ProjectDataFactor, 2)[1:min(max_data_report,nrow(ProjectDataFactor)), ])
 ```
 
+
+<!-- # ```{r} -->
+<!-- # range(ProjectData[,11]) -->
+<!-- # mean(ProjectData[,11]) -->
+<!-- # mean(ProjectData[,12]) -->
+<!-- # ``` -->
+
+In January 2008, American Airline has `r nrow(ProjectData)` number of demestic flight delays
+
+<!-- Histgram  -->
 ```{r}
 hist(ProjectData[,11], main = "Arrival Delay", xlab = "Minutes")
 hist(ProjectData[,12], main = "Departure Delay", xlab = "Minutes")
+```
+
+
+```{r}
+knitr::kable(round(my_summary(ProjectDataFactor), 2))
+```
+
+
+## Scale the data
+
+```{r, echo=TRUE, tidy=TRUE}
+ProjectDatafactor_scaled=apply(ProjectDataFactor,2, function(r) {if (sd(r)!=0) res=(r-mean(r))/sd(r) else res=0*r; res})
+```
+
+Notice now the summary statistics of the scaled dataset:
+
+```{r}
+knitr::kable(round(my_summary(ProjectDatafactor_scaled), 2))
+```
+
+As expected all variables have mean 0 and standard deviation 1.
+
+## Check Correlations
+
+<!-- Below function does the correlation  -->
+
+```{r}
+thecor = round(cor(ProjectDataFactor),2)
+colnames(thecor)<-colnames(ProjectDataFactor)
+rownames(thecor)<-colnames(ProjectDataFactor)
+
+knitr::kable(round(thecor,2))
+```
+
+
+## Principle Components Analysis
+
+```{r}
+UnRotated_Results<-principal(ProjectDataFactor, nfactors = ncol(ProjectDataFactor), rotate="none",score=TRUE)
+UnRotated_Factors<-round(UnRotated_Results$loadings,2)
+UnRotated_Factors<-as.data.frame(unclass(UnRotated_Factors))
+colnames(UnRotated_Factors)<-paste("Component",1:ncol(UnRotated_Factors),sep=" ")
 ```
 
 
