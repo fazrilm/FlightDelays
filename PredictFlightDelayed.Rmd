@@ -14,6 +14,8 @@ output:
       in_header: ../../INSEADAnalytics/AnalyticsStyles/default.sty
 always_allow_html: yes
 ---
+<!-- This part contains the function libraries that will be used in the analyisis, pointing the library folder -->
+
 ```{r setuplibraries, echo=FALSE, message=FALSE}
 
 source("Library/library.R")
@@ -74,7 +76,7 @@ ProjectDataFactor <- ProjectData <- data.matrix(ProjectDataFactor)
 rownames(ProjectDataFactor) <- paste0("", sprintf("%02i", 1:nrow(ProjectDataFactor)))
 ```
 
-<!-- End  -->
+
 
 ## Introduction
 
@@ -92,6 +94,8 @@ We aim to have a deep understanding of the causes of the flight delay from a sta
 
 This is how the first `r min(max_data_report, nrow(ProjectData))` data looks:
 
+<!-- This is showing the data table, how to add a scroll bar?  -->
+
 ```{r}
 knitr::kable(round(ProjectDataFactor, 2)[1:min(max_data_report,nrow(ProjectDataFactor)), ])
 ```
@@ -105,7 +109,7 @@ knitr::kable(round(ProjectDataFactor, 2)[1:min(max_data_report,nrow(ProjectDataF
 
 In January 2008, American Airline has `r nrow(ProjectData)` number of demestic flight delays
 
-<!-- Histgram  -->
+<!-- This is for the histgram  -->
 ```{r}
 hist(ProjectData[,11], main = "Arrival Delay", xlab = "Minutes")
 hist(ProjectData[,12], main = "Departure Delay", xlab = "Minutes")
@@ -124,6 +128,8 @@ ProjectDatafactor_scaled=apply(ProjectDataFactor,2, function(r) {if (sd(r)!=0) r
 ```
 
 Notice now the summary statistics of the scaled dataset:
+
+<!-- This is showing the table after scaling -->
 
 ```{r}
 knitr::kable(round(my_summary(ProjectDatafactor_scaled), 2))
