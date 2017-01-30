@@ -52,7 +52,7 @@ ProjectData=data.matrix(ProjectData)
 
 # Please ENTER then original raw attributes to use. 
 # Please use numbers, not column names! e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
-factor_attributes_used= c(4:22)
+factor_attributes_used= c(16:22)
 
 # Please ENTER the selection criterions for the factors to use. 
 # Choices: "eigenvalue", "variance", "manual"
@@ -105,14 +105,16 @@ knitr::kable(round(ProjectDataFactor, 2)[1:min(max_data_report,nrow(ProjectDataF
 <!-- # range(ProjectData[,11]) -->
 <!-- # mean(ProjectData[,11]) -->
 <!-- # mean(ProjectData[,12]) -->
-<!-- # ``` -->
 
-In January 2008, American Airline has `r nrow(ProjectData)` number of demestic flight delays
+
+
+In January 2008, American Airline has `r nrow(ProjectData)` number of domestic flight delays. We have the break down of major causes of delays. For instance, the average of Taxi in Delay is `r mean(ProjectData[,1])` and the average of taxi out delay is `r mean(ProjectData[,2])`. Below we can also find the table with the summary of information
 
 <!-- This is for the histgram  -->
 ```{r}
-hist(ProjectData[,11], main = "Arrival Delay", xlab = "Minutes")
-hist(ProjectData[,12], main = "Departure Delay", xlab = "Minutes")
+hist(ProjectData[,1], main = "Taxi In delay", xlab = "Minutes")
+hist(ProjectData[,2], main = "Taxi out delay", xlab = "Minutes")
+
 ```
 
 
@@ -149,6 +151,13 @@ rownames(thecor)<-colnames(ProjectDataFactor)
 knitr::kable(round(thecor,2))
 ```
 
+
+```{r}
+UnRotated_Results<-principal(ProjectDataFactor, nfactors=ncol(ProjectDataFactor), rotate="none",score=TRUE)
+UnRotated_Factors<-round(UnRotated_Results$loadings,2)
+UnRotated_Factors<-as.data.frame(unclass(UnRotated_Factors))
+colnames(UnRotated_Factors)<-paste("Component",1:ncol(UnRotated_Factors),sep=",")
+```
 
 ## Principle Components Analysis
 
@@ -188,8 +197,35 @@ if (factor_selectionciterion == "manual")
 For our data, the `r factors_selected` selected factors look as follows after the `r rotation_used` rotation: 
 
 
+```{r}
+Rotated_Results<-principal(ProjectDataFactor, nfactors=max(factors_selected), rotate=rotation_used,score=TRUE)
+Rotated_Factors<-round(Rotated_Results$loadings,2)
+Rotated_Factors<-as.data.frame(unclass(Rotated_Factors))
+colnames(Rotated_Factors)<-paste("Component",1:ncol(Rotated_Factors),sep=",")
+
+sorted_rows <- sort(Rotated_Factors[,1], decreasing = TRUE, index.return = TRUE)$ix
+Rotated_Factors <- Rotated_Factors[sorted_rows,]
+
+knitr::kable(Rotated_Factors)
+```
+
+```{r}
+Rotated_Factors_thres <- Rotated_Factors
+Rotated_Factors_thres[abs(Rotated_Factors_thres) < MIN_VALUE]<-NA
+colnames(Rotated_Factors_thres)<- colnames(Rotated_Factors)
+rownames(Rotated_Factors_thres)<- rownames(Rotated_Factors)
+
+knitr::kable(Rotated_Factors_thres)
+```
 
 
+
+```{r}
+NEW_ProjectData <- round(Rotated_Results$scores[,1:factors_selected,drop=F],2)
+colnames(NEW_ProjectData)<-paste("Derived Variable (Factor)",1:ncol(NEW_ProjectData),sep=" ")
+
+knitr::kable(NEW_ProjectData[1:min(max_data_report,nrow(NEW_ProjectData)), , drop=F])
+```
 
 <!-- # ```{r cars} -->
 <!-- # summary(cars) -->
