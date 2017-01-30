@@ -91,10 +91,10 @@ We aim to have a deep understanding of the causes of the flight delay from a sta
 
 ## Process
 
-Define the problem: There are several causes of departure delays of airlines, some of them are related to the operation and other are related to external factors such as weather. We need to isolate the main factors of delay so AA can focus their efforts to improve the operation
-<br>Gather and clean data: We gather data from Kaggle and reduce the number of rows. Originaly the filed had more than one million rows, including all airlines during 2008. We decided to reduce the scope to American Airlines and the month of January. By selecting only one month we reduce seasonality on the data
-<br>Analyze data: We looked for variables that made business sense and were independent and relevant for our statistical analysis
-<br>Business recommendation: We selected number of factors that would allow us to create a sound business recommendation to AA. The criteria to create a recommendation is to identify practical implementation steps to improve operation
+- Define the problem: There are several causes of departure delays of airlines, some of them are related to the operation and other are related to external factors such as weather. We need to isolate the main factors of delay so AA can focus their efforts to improve the operation.
+<br>- Gather and clean data: We gather data from Kaggle and reduce the number of rows. Originaly the filed had more than one million rows, including all airlines during 2008. We decided to reduce the scope to American Airlines and the month of January. By selecting only one month we also reduced seasonality on the data.
+<br>- Analyze data: We looked for variables that made business sense and were independent and relevant for our statistical analysis.
+<br>- Business recommendation: We selected number of factors that would allow us to create a sound business recommendation to AA. The criteria to create a recommendation is to identify practical implementation steps to improve operation
 
 ## Explaining the data
 
