@@ -1,0 +1,271 @@
+---
+title: "Predicting American Airline Flight Delays in United States"
+author: "Bruce Zhang, Jaime Andaluz, Frazil Mustapa, Isha Singh  "
+output:
+  html_document:
+    css: ../../INSEADAnalytics/AnalyticsStyles/default.css
+    theme: paper
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    includes:
+      in_header: ../../INSEADAnalytics/AnalyticsStyles/default.sty
+always_allow_html: yes
+---
+<!-- This part contains the function libraries that will be used in the analyisis, pointing the library folder -->
+
+```{r setuplibraries, echo=FALSE, message=FALSE}
+
+source("Library/library.R")
+source("Library/heatmapOutput.R")
+ggthemr('fresh')  # ggplot theme
+opts_knit$set(progress=FALSE, verbose=FALSE)
+opts_chunk$set(echo=FALSE, fig.align="center", fig.width=10, fig.height=6.5)
+options(knitr.kable.NA = '')
+```
+
+<!-- This part contains the setting of the variables used in the analysis -->
+
+```{r setup, echo=FALSE, message=FALSE}
+# Load the data
+
+# Please ENTER the name of the file with the data used. The file should be a .csv with one row per observation (e.g. person) and one column per attribute. 
+
+datafile_name="Jan_AA" #  do not add .csv at the end, make sure the data are numeric, check your file.
+
+# Please enter the minimum number below which you would like not to print - this makes the readability of the tables easier. Default values are either 10e6 (to print everything) or 0.5. Try both to see the difference.
+MIN_VALUE=0.5
+
+# Please enter the maximum number of observations to show in the report and slides 
+# (DEFAULT is 15. If the number is large the report and slides may not be generated - very slow or will crash!!)
+max_data_report = 15
+
+ProjectData <- read.csv(file = "Jan_AA.csv", header = TRUE, sep=",") # this contains only the matrix ProjectData
+ProjectData=data.matrix(ProjectData) 
+
+# if (datafile_name == "Jan_AA")
+#   colnames(ProjectData)<-gsub("\\."," ",colnames(ProjectData))
+
+# SET UP OF ALL THE INPUTS FOR THIS READING
+
+# Please ENTER then original raw attributes to use. 
+# Please use numbers, not column names! e.g. c(1:5, 7, 8) uses columns 1,2,3,4,5,7,8
+factor_attributes_used= c(10, 18:22)
+
+# Please ENTER the selection criterions for the factors to use. 
+# Choices: "eigenvalue", "variance", "manual"
+factor_selectionciterion = "manual"
+
+# Please ENTER the desired minumum variance explained 
+# (ONLY USED in case "variance" is the factor selection criterion used). 
+minimum_variance_explained = 65  # between 1 and 100
+
+# Please ENTER the number of factors to use 
+# (ONLY USED in case "manual" is the factor selection criterion used).
+manual_numb_factors_used = 3
+
+# Please ENTER the rotation eventually used (e.g. "none", "varimax", "quatimax", "promax", "oblimin", "simplimax", and "cluster" - see help(principal)). Defauls is "varimax"
+rotation_used="varimax"
+
+factor_attributes_used = unique(sapply(factor_attributes_used,function(i) min(ncol(ProjectData), max(i,1))))
+ProjectDataFactor=ProjectData[,factor_attributes_used]
+ProjectDataFactor <- ProjectData <- data.matrix(ProjectDataFactor)
+
+rownames(ProjectDataFactor) <- paste0("", sprintf("%02i", 1:nrow(ProjectDataFactor)))
+```
+
+
+
+## Introduction
+
+This project is done by a group of INSEAD MBA(17J) students who are enrolled in the Big Data and Analytics for Business elective conducted by Prof Theos Evgeniou in 2017 Jan. We use several statistical analysis models learned in the class to analyze a new dataset about US deomestic flight delay in 2008, with the aim to find out the main causes for flight delay. We also aim to provide a statistical guideline to American Airlines, so they can  focuse their operational improvements in order to increase customer satisfaction. The work is written in R programming language. 
+
+
+## Project Description
+
+Flight delays are a key factor for airline profitability, since it decreases the utilization of the assets, decreases negotiation power with airports, and create a bad perception on customers. 
+
+We aim to have a deep understanding of the causes of the flight delay from a statistical approach. Based on the data we gather for American Airline flight delay in 2008 Jan, we will perform factor analysis to find out the reasons of the delay and try to develop a predictive model to predict future flight delay.
+
+## Process
+
+Define the problem: There are several causes of departure delays of airlines, some of them are related to the operation and other are related to external factors such as weather. We need to isolate the main factors of delay so AA can focus their efforts to improve the operation
+Gather and clean data: We gather data from Kaggle and reduce the number of rows. Originaly the filed had more than one million rows, including all airlines during 2008. We decided to reduce the scope to American Airlines and the month of January. By selecting only one month we reduce seasonality on the data
+Analyze data: We looked for variables that made business sense and were independent and relevant for our statistical analysis
+Business recommendation: We selected number of factors that would allow us to create a sound business recommendation to AA. The criteria to create a recommendation is to identify practical implementation steps to improve operation
+
+## Explaining the data
+
+
+This is how the first `r min(max_data_report, nrow(ProjectData))` data looks:
+
+<!-- This is showing the data table, how to add a scroll bar?  -->
+
+```{r}
+knitr::kable(round(ProjectDataFactor, 2)[1:min(max_data_report,nrow(ProjectDataFactor)), ])
+```
+
+
+<!-- # ```{r} -->
+<!-- # range(ProjectData[,11]) -->
+<!-- # mean(ProjectData[,11]) -->
+<!-- # mean(ProjectData[,12]) -->
+
+
+
+In January 2008, American Airline has `r nrow(ProjectData)` number of domestic flight delays. We have the break down of major causes of delays. For instance, the average of Taxi in Delay is `r mean(ProjectData[,1])` and the average of taxi out delay is `r mean(ProjectData[,2])`. Below we can also find the table with the summary of information
+
+<!-- This is for the histgram  -->
+```{r}
+hist(ProjectData[,1], main = "Air Time", xlab = "Minutes")
+
+
+```
+
+
+```{r}
+knitr::kable(round(my_summary(ProjectDataFactor), 2))
+```
+
+
+## Scale the data
+
+```{r, echo=TRUE, tidy=TRUE}
+ProjectDatafactor_scaled=apply(ProjectDataFactor,2, function(r) {if (sd(r)!=0) res=(r-mean(r))/sd(r) else res=0*r; res})
+```
+
+Notice now the summary statistics of the scaled dataset:
+
+<!-- This is showing the table after scaling -->
+
+```{r}
+knitr::kable(round(my_summary(ProjectDatafactor_scaled), 2))
+```
+
+As expected all variables have mean 0 and standard deviation 1.
+
+## Check Correlations
+
+<!-- Below function does the correlation  -->
+
+```{r}
+thecor = round(cor(ProjectDataFactor),2)
+colnames(thecor)<-colnames(ProjectDataFactor)
+rownames(thecor)<-colnames(ProjectDataFactor)
+
+knitr::kable(round(thecor,2))
+```
+
+
+```{r}
+UnRotated_Results<-principal(ProjectDataFactor, nfactors=ncol(ProjectDataFactor), rotate="none",score=TRUE)
+UnRotated_Factors<-round(UnRotated_Results$loadings,2)
+UnRotated_Factors<-as.data.frame(unclass(UnRotated_Factors))
+colnames(UnRotated_Factors)<-paste("Component",1:ncol(UnRotated_Factors),sep=",")
+```
+
+## Principle Components Analysis
+
+
+```{r}
+Variance_Explained_Table_results<-PCA(ProjectDataFactor, graph=FALSE)
+Variance_Explained_Table<-Variance_Explained_Table_results$eig
+Variance_Explained_Table_copy<-Variance_Explained_Table
+
+
+rownames(Variance_Explained_Table) <- paste("Component", 1:nrow(Variance_Explained_Table))
+colnames(Variance_Explained_Table) <- c("Eigenvalue", "Pct of explained variance", "Cumulative pct of explained variance")
+
+knitr::kable(round(Variance_Explained_Table, 2))
+```
+
+
+```{r figure01}
+eigenvalues  <- Variance_Explained_Table[, "Eigenvalue"]
+df           <- cbind(as.data.frame(eigenvalues), c(1:length(eigenvalues)), rep(1, length(eigenvalues)))
+colnames(df) <- c("eigenvalues", "components", "abline")
+ggplot(melt(df, id="components"), aes(x=components, y=value, colour=variable)) + geom_line()
+```
+
+
+## Interpretation
+
+```{r}
+if (factor_selectionciterion == "eigenvalue")
+  factors_selected = sum(Variance_Explained_Table_copy[,1] >= 1)
+if (factor_selectionciterion == "variance")
+  factors_selected = 1:head(which(Variance_Explained_Table_copy[,"cumulative percentage of variance"]>= minimum_variance_explained),1)
+if (factor_selectionciterion == "manual")
+  factors_selected = manual_numb_factors_used
+
+```
+For our data, the `r factors_selected` selected factors look as follows after the `r rotation_used` rotation: 
+
+
+```{r}
+Rotated_Results<-principal(ProjectDataFactor, nfactors=max(factors_selected), rotate=rotation_used,score=TRUE)
+Rotated_Factors<-round(Rotated_Results$loadings,2)
+Rotated_Factors<-as.data.frame(unclass(Rotated_Factors))
+colnames(Rotated_Factors)<-paste("Component",1:ncol(Rotated_Factors),sep=",")
+
+sorted_rows <- sort(Rotated_Factors[,1], decreasing = TRUE, index.return = TRUE)$ix
+Rotated_Factors <- Rotated_Factors[sorted_rows,]
+
+knitr::kable(Rotated_Factors)
+```
+
+```{r}
+Rotated_Factors_thres <- Rotated_Factors
+Rotated_Factors_thres[abs(Rotated_Factors_thres) < MIN_VALUE]<-NA
+colnames(Rotated_Factors_thres)<- colnames(Rotated_Factors)
+rownames(Rotated_Factors_thres)<- rownames(Rotated_Factors)
+
+knitr::kable(Rotated_Factors_thres)
+```
+
+
+
+```{r}
+NEW_ProjectData <- round(Rotated_Results$scores[,1:factors_selected,drop=F],2)
+colnames(NEW_ProjectData)<-paste("Derived Variable (Factor)",1:ncol(NEW_ProjectData),sep=" ")
+
+knitr::kable(NEW_ProjectData[1:min(max_data_report,nrow(NEW_ProjectData)), , drop=F])
+```
+
+
+
+
+
+<!-- # ```{r cars} -->
+<!-- # summary(cars) -->
+<!-- # ``` -->
+## Conclusion
+
+Based on the factor analysis, we can group the delays into 3 major factors:
+1. Airline Operation
+     Flight delays are caused by the distance / air time of the specific flights
+ Recommendation: Take preventing measures to avoid delays when flight time is long. For instance, adjust departure/arrival time to account for this delay
+
+2. Airport Operation
+    Flight delays are caused by mismanagement of airport operators
+Recommendation: Revise contracts with airport operators to get priority on landing/departing
+
+3. God
+    Flight delays are caused by uncontrollable factors – i.e. the weather
+Recommendation: During winter season, keep passengers constantly informed of potential delays by emailing them or text. 
+
+These 3 factors above explain 55% of the flight delays in our database.
+
+
+
+## Additional Plots
+
+<!-- You can also embed plots, for example: -->
+
+<!-- ```{r pressure, echo=FALSE} -->
+<!-- plot(pressure) -->
+<!-- ``` -->
+
+<!-- Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot. -->
