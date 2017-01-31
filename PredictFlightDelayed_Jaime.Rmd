@@ -92,14 +92,27 @@ We aim to have a deep understanding of the causes of the flight delay from a sta
 ## Process
 
 - Define the problem: There are several causes of departure delays of airlines, some of them are related to the operation and other are related to external factors such as weather. We need to isolate the main factors of delay so AA can focus their efforts to improve the operation.
-<br>- Gather and clean data: We gather data from Kaggle and reduced the number of rows. Originaly the files had more than one million rows, including all airlines during 2008. We decided to reduce the scope to American Airlines and the month of January. By selecting only one month we also reduced seasonality on the data.
-<br>- Analyze data: We looked for variables that made business sense and were independent and relevant for our statistical analysis.
-<br>- Business recommendation: We selected number of factors that would allow us to create a sound business recommendation to AA. The criteria to create a recommendation is to identify practical implementation steps to improve operation
+
+- Gather and clean data: We gather data from Kaggle and reduced the number of rows. Originaly the files had more than one million rows, including all airlines during 2008. We decided to reduce the scope to American Airlines and the month of January. By selecting only one month we also reduced seasonality on the data.
+
+- Analyze data: We looked for variables that made business sense and were independent and relevant for our statistical analysis.
+
+- Business recommendation: We selected number of factors that would allow us to create a sound business recommendation to AA. The criteria to create a recommendation is to identify practical implementation steps to improve operation
 
 ## Explaining the data
 
+First of all, we explain the several types of delays in aviation industry: 
 
-This is how the first `r min(max_data_report, nrow(ProjectData))` data looks:
+Air Carrier: The cause of the cancellation or delay was due to circumstances within the airline's control (e.g. maintenance or crew problems, aircraft cleaning, baggage loading, fueling, etc.).
+
+Extreme Weather: Significant meteorological conditions (actual or forecasted) that, in the judgment of the carrier, delays or prevents the operation of a flight such as tornado, blizzard or hurricane.
+
+National Aviation System (NAS): Delays and cancellations attributable to the national aviation system that refer to a broad set of conditions, such as non-extreme weather conditions, airport operations, heavy traffic volume, and air traffic control.
+Late-arriving aircraft: A previous flight with same aircraft arrived late, causing the present flight to depart late.
+
+Security: Delays or cancellations caused by evacuation of a terminal or concourse, re-boarding of aircraft because of security breach, inoperative screening equipment and/or long lines in excess of 29 minutes at screening areas.
+
+This is how the first `r min(max_data_report, nrow(ProjectData))` data among `r nrow(ProjectData)` number of data looks:
 
 <!-- This is showing the data table, how to add a scroll bar?  -->
 
@@ -244,23 +257,21 @@ knitr::kable(NEW_ProjectData[1:min(max_data_report,nrow(NEW_ProjectData)), , dro
 ## Conclusion
 
 Based on the factor analysis, we can group the delays into 3 major factors:
-1. Airline Operation
-     Flight delays are caused by the distance / air time of the specific flights
+
+1. Airline Operation: Flight delays are caused by the distance / air time of the specific flights
  Recommendation: Take preventing measures to avoid delays when flight time is long. For instance, adjust departure/arrival time to account for this delay
 
-2. Airport Operation
-    Flight delays are caused by mismanagement of airport operators
+2. Airport Operation: Flight delays are caused by mismanagement of airport operators
 Recommendation: Revise contracts with airport operators to get priority on landing/departing
 
-3. God
-    Flight delays are caused by uncontrollable factors – i.e. the weather
+3. God: Flight delays are caused by uncontrollable factors – i.e. the weather
 Recommendation: During winter season, keep passengers constantly informed of potential delays by emailing them or text. 
 
 These 3 factors above explain 55% of the flight delays in our database.
 
 
 
-## Additional Plots
+<!-- ## Additional Plots -->
 
 <!-- You can also embed plots, for example: -->
 
